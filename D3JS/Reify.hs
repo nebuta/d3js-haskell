@@ -14,7 +14,8 @@ instance Reifiable (Chain a b) where
 	reify (Val name) = name
 	reify (Val' v) = reify v
 	reify (Val'' (Var' n)) = n
-	reify (Concat f g) = T.concat [reify g,".",reify f]  -- method chain flows from left to right, so flips f and g.
+	reify (Concat Nil g) = reify g
+	reify (Concat f g) = T.concat [reify g,".",reify f] -- method chain flows from left to right, so flips f and g.
 	reify (Func f) = reify f
 	reify Nil = ""
 

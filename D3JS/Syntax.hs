@@ -53,6 +53,9 @@ class Assignable a where
 instance Assignable Data2D where
 	newVar = newVar' "dat"
 
+instance Assignable (SelData Data2D) where
+	newVar = newVar' "sel_dat"
+
 instance Assignable Selection where
 	newVar = newVar' "sel"
 

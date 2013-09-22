@@ -54,7 +54,7 @@ instance Sel (SelData a)
 -- |Used just as a tag for typing method chains. Used in "D3JS.Func".
 class Sel2 a
 instance Sel2 Selection
--- instance Sel2 D3Root
+instance Sel2 (SelData a)
 instance Sel2 (Chain () b)
 
 

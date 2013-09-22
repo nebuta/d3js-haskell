@@ -82,6 +82,13 @@ height v = attr "height" (PDouble v)
 
 transform = attrt "transform"
 
+transform' :: Double -> Double -> Double -> Double -> Double -> Chain a a
+transform' tx ty sx sy r =
+	attrt "transform" $
+		T.concat ["translate(",f tx, " ",f ty,") scale(",f sx, " ", f sy, ") rotate(",f r, ")"]
+	where
+		f v = T.pack $ show v
+
 opacity :: Sel a => Double -> Chain a a
 opacity = attrd "fill-opacity"
 
@@ -91,11 +98,11 @@ fill = style "fill"
 -- * Transitions
 
 -- | transition()
-transition :: Chain Selection Transition
+transition :: (Sel2 a) => Chain a Transition
 transition = func "transition" []
 
 -- | trasition().delay(time)
-transition' :: Double -> Chain Selection Transition
+transition' :: (Sel2 a) => Double -> Chain a Transition
 transition' d = transition >>> funcd1 "duration" d
 
 -- | delay()

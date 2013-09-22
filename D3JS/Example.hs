@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module D3JS.Example (
-	test
+	test1
 	, test2
 	, test3
 	, writeToHtml
@@ -17,33 +17,39 @@ import System.Random
 
 -- * Examples
 
--- | Scatter plot. Generate 'generated.js' file.
-test :: IO ()
-test = do
-	ps <- fmap Data2D $ randPs 100
-	let graph = reify $ do
-		elem <- box "#div1" (300,300)
-		e <- scatter ps elem
-		addFrame e
-	T.writeFile "generated.js" graph
-
--- | Scatter plot with smaller size. Generate 'generated.js' file.
-test2 :: IO ()
-test2 = do
-	ps <- fmap Data2D $ randPs 100
-	let graph = reify $ (box "#div1" (300,300) >>= scatter ps >>= disappear 500 1000)
-	T.writeFile "generated.js" graph
+-- | Scatter plot with a frame. Generate 'test1.html' file.
+test1, test2, test3 :: IO ()
+test1 = do
+	ps <- rand2D 100
+	writeToHtml "test1.html" (graph1 ps)
 
 -- | Scatter plot with dissolving transition. Generate 'generated.js' file.
-test3 :: Int -> IO ()
-test3 n = do
-	vs <- replicateM n $ getStdRandom (randomR (100,300))
-	T.writeFile "generated.js" $ reify $ do
-		elem <- box "#div1" (300,300)
-		bars n 300 (Data1D vs) elem
+test2 = do
+	ps <- rand2D 100
+	writeToHtml "test2.html" (graph2 ps)
 
-randPs :: Int -> IO [(Double,Double)]
-randPs n = do
+-- | Bar chart. Generate 'generated.js' file.
+test3 = do
+	ps <- replicateM 10 $ getStdRandom (randomR (100,300))
+	writeToHtml "test3.html" (graph3 ps)
+
+graph1,graph2 :: [(Double,Double)] -> St ()
+graph3 :: [Double] -> St ()
+
+graph1 ps = do
+	let dim = (300,300)
+	elem <- box "#div1" dim
+	scatter (Data2D ps) elem
+	addFrame dim (250,250) elem 
+
+graph2 ps = box "#div1" (300,300) >>= scatter (Data2D ps) >>= disappear 500 1000
+
+graph3 ps = do
+	elem <- box "#div1" (300,300)
+	bars 10 300 (Data1D ps) elem
+
+rand2D :: Int -> IO [(Double,Double)]
+rand2D n = do
 	xs <- replicateM n $ getStdRandom (randomR (1,300))
 	ys <- replicateM n $ getStdRandom (randomR (1,300))
 	return (zip xs ys)
