@@ -1,0 +1,63 @@
+name:                d3js
+version:             0.1.0.0
+synopsis:            Declarative visualization on a web browser with DSL approach.
+description:
+  Data visualization on a web browser. This works as a DSL that generates JavaScript source code working with D3.js (http://d3js.org/) library.
+  .
+  You can compose operations with a typed DSL with Haskell's abstraction power.
+  .
+  This is still an alpha version. 
+  .
+  * A simplest example: drawing a bar chart
+  .
+  > import Control.Monad
+  > import qualified Data.Text as T
+  > import D3JS
+  >
+  > test :: Int -> IO ()
+  > test n = T.writeFile "generated.js" $ reify (box "#div1" (300,300) >>= bars n 300 (Data1D [100,20,80,60,120]))
+  .
+  You can just put the JavaScript file in an HTML file like the following to show a chart.
+  .
+  > <html>
+  > <head>
+  >   <title>Chart</title>
+  > </head>
+  > <body>
+  >   <div id='div1'></div>
+  >   <script charset='utf-8' src='http://d3js.org/d3.v3.min.js'></script>
+  >   <script charset='utf-8' src='generated.js'></script>
+  > </body>
+  > </html>
+  .
+  See "D3JS.Example" for more examples.
+
+homepage:            https://github.com/nebuta/d3js-haskell
+license:             BSD3
+license-file:        LICENSE
+author:              Nebuta
+maintainer:          nebuta.office@gmail.com
+-- copyright:           
+category:            Graphics
+build-type:          Simple
+-- extra-source-files:  
+stability: Experimental
+cabal-version:       >=1.10
+
+library
+  exposed-modules:
+                       D3JS
+                       D3JS.Type
+                       D3JS.Func
+                       D3JS.Syntax
+                       D3JS.Chart
+                       D3JS.Reify
+                       D3JS.Example
+  -- other-modules:       
+  -- other-extensions:    
+  build-depends:       base >=4.6 && <4.7
+                       , mtl
+                       , text
+                       , random
+  -- hs-source-dirs:      
+  default-language:    Haskell2010
