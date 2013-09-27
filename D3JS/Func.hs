@@ -12,7 +12,7 @@ import qualified Data.Text as T
 import Prelude hiding ((.),id)
 import Control.Category
 
--- * Selection
+-- * Selection and data assignment
 
 -- | d3 object in D3.js
 d3Root :: Chain () Selection
@@ -32,13 +32,36 @@ selectAll = funct1 "selectAll"
 dataD3 :: Var' r -> Chain Selection (SelData r)
 dataD3 (Var' d) = func "data" [ParamVar d]
 
+-- | insert()
+insertD3 :: Text -> Chain (SelData a) (SelData a)
+insertD3 = funct1 "append"
+
 -- | enter()
 enter :: Chain (SelData r) (SelData r)
 enter = func "enter" []
 
 -- | exit()
-exit :: (Sel a) => Chain a a
+exit :: Chain (SelData r) (SelData r)
 exit = func "exit" []
+
+-- | remove()
+remove :: Chain (SelData r) (SelData r)
+remove = func "remove" []
+
+datum :: Var' r -> Chain Selection (SelData r)
+datum (Var' d) = func "datum" [ParamVar d]
+
+-- | filter()
+filterD3 :: FuncDef -> Chain (SelData r) (SelData r)
+filterD3 f = func "filter" [PFunc f]
+
+-- | sort()
+sortD3 :: FuncDef -> Chain (SelData r) (SelData r)
+sortD3 f = func "sort" [PFunc f]
+
+-- | order()
+order :: Chain (SelData r) (SelData r)
+order = func "order" []
 
 -- | append()
 appendD3 :: Text -> Chain (SelData a) (SelData a)
@@ -95,19 +118,61 @@ opacity = attrd "fill-opacity"
 fill :: Sel a => Text -> Chain a a
 fill = style "fill"
 
--- * Transitions
+-- * Animation and Interaction
+
+-- | on()
+on :: Text -> FuncDef -> Chain (SelData r) (SelData r)
+on typ f = func "on" [PText typ,PFunc f]
+
+mouse :: Text -> FuncDef
+mouse container = FuncTxt $ T.concat ["d3.mouse(",container,")"]
+
+touches :: Text -> FuncDef
+touches container = FuncTxt $ T.concat ["d3.touches(",container,")"]
 
 -- | transition()
 transition :: (Sel2 a) => Chain a Transition
 transition = func "transition" []
 
--- | trasition().delay(time)
-transition' :: (Sel2 a) => Double -> Chain a Transition
-transition' d = transition >>> funcd1 "duration" d
+-- | trasition().duration(time). time can be any of "JSParam"
+transition' :: (Sel2 a) => JSParam -> Chain a Transition
+transition' d = transition >>> func "duration" [d]
+
+-- | trasition().duration(time). time can be any of "JSParam"
+transition_d :: (Sel2 a) => Double -> Chain a Transition
+transition_d d = transition >>> funcd1 "duration" d
+
+interrupt = func "interrupt" []
 
 -- | delay()
 delay :: JSParam -> Chain Transition Transition
 delay v = func "delay" [v]
+
+-- * Control
+
+-- | each()
+each :: FuncDef -> Chain a a
+each f = func "each" [PFunc f]
+
+-- | call()
+call :: FuncDef -> Chain a a
+call f = func "call" [PFunc f]
+
+-- | empty()
+empty :: (Sel a) => Chain a Bool
+empty = func "empty" []
+
+-- | node()
+node :: (Sel a) => Chain a a
+node = func "node" []
+
+-- | size()
+size :: (Sel a) => Chain a Int
+size = func "size" []
+
+
+-- * Transitions
+
 
 -- * Helper functions for Chain a b type
 
@@ -122,7 +187,4 @@ funcd1 name v = func name [PDouble v]
 func' :: FuncName -> [JSParam] -> Chain a a
 func' = func
 
-funcTxt :: Text -> JSParam
-funcTxt = PFunc . FuncTxt
 
-funcExp = PFunc . FuncExp

@@ -40,9 +40,13 @@ instance Reifiable JSParam where
 
 
 instance Reifiable (NumFunc r) where
+	reify (NInt i) = show' i
+	reify (NDouble d) = show' d
+	reify (Mult a b) = T.concat [reify a," * ",reify b]
 	reify DataParam = "d"
-	reify (Index i ns) = T.concat [reify ns,"[",show' i,"]"]
+	reify (Index i ns) = T.concat [reify ns,"[",reify i,"]"]
 	reify (Field name obj) = T.concat [reify obj,".",name]
+	reify (ApplyFunc name params) = T.concat [name,"\"",T.concat $ map reify params,"\""]
 	-- Stub: incomplete!!
 
 

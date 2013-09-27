@@ -30,10 +30,11 @@ execute :: Chain () b -> St ()
 execute chain = tell $ T.concat [reify chain,";\n"]
 
 -- | d[0] as a user-defined function.
-idx0 = Index 0 DataParam
+idx0,idx1 :: NumFunc r
+idx0 = Index (NInt 0) DataParam
 
 -- | d[1] as a user-defined function.
-idx1 = Index 1 DataParam
+idx1 = Index (NInt 1) DataParam
 
 -- | d.x as a user-defined function.
 _x = Field "x" DataParam

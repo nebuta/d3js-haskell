@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings, GADTs, NoImplicitPrelude, ExistentialQuantification, FlexibleInstances #-}
+{-# LANGUAGE OverloadedStrings, GADTs, NoImplicitPrelude, ExistentialQuantification, FlexibleInstances,OverlappingInstances #-}
 
 module D3JS.Type where
 
@@ -34,13 +34,15 @@ type Selector = Text
 
 -- data D3Root = D3Root
 
-data Data1D = Data1D [Double]
-data Data2D = Data2D [(Double,Double)]
+data Data1D = Data1D [Double] deriving (Show)
+data Data2D = Data2D [(Double,Double)] deriving (Show)
 
-data Selection = Selection
-
+-- Selection with associated data
 data SelData a = SelData
-data Transition = Transition  -- this is just used as a tag for chaining functions with a type.
+
+-- The following types are just used as a tag for chaining functions with a type.
+data Selection = Selection
+data Transition = Transition
 
 -- |Instances of Reifiable can generate a JavaScript code fragment.
 class Reifiable a where
@@ -61,7 +63,7 @@ instance Sel2 (Chain () b)
 
 -- * For internal use
 
--- | Function call
+-- | Function call for method chaining
 data JSFunc a c b = JSFunc FuncName [JSParam]  -- name and params
 
 type FuncName = Text
@@ -72,6 +74,10 @@ data JSParam = ParamVar Var | PText Text | PDouble Double | PFunc FuncDef
 -- | Function definition used for a callback.
 data FuncDef = FuncTxt Text | forall r. FuncExp (NumFunc r)
 
+funcTxt :: Text -> JSParam
+funcTxt = PFunc . FuncTxt
+
+funcExp = PFunc . FuncExp
 -- | Representation of JavaScript function for a callback.
 data NumFunc r where
 	NInt :: Int -> NumFunc Int
@@ -80,10 +86,33 @@ data NumFunc r where
 	Subt :: NumFunc r -> NumFunc r -> NumFunc r
 	Mult :: NumFunc r -> NumFunc r -> NumFunc r
 	Div :: NumFunc r -> NumFunc r -> NumFunc r
-	Index :: Int -> NumFunc [r] -> NumFunc r
+	Index :: NumFunc Int -> NumFunc [r] -> NumFunc r
 	Field :: Text -> NumFunc a -> NumFunc r
 	NVar :: Var -> NumFunc r
 	DataParam :: NumFunc r
+	ApplyFunc :: FuncName -> [JSParam] -> NumFunc r -- different from JSFunc, because this is not a method chain.
+
+class NumFuncVal a
+instance NumFuncVal Int
+instance NumFuncVal Double
+
+instance Num (NumFunc Int) where
+	fromInteger = NInt . fromIntegral
+	(+) = Add
+	(*) = Mult
+	abs a = ApplyFunc "abs" [funcExp a]
+	signum a = ApplyFunc "abs" [funcExp a]
+
+instance Num (NumFunc Double) where
+	(+) = Add
+	(*) = Mult
+	abs a = ApplyFunc "abs" [funcExp a]
+	fromInteger = fromInteger
+
+instance Fractional (NumFunc Double) where
+	(/) =  Div
+	fromRational = NDouble . fromRational 
+
 
 -- |This should not be used directly by users. Users should use 'assign' to get a variable instead.
 data Var' dat = Var' Var  -- typed variables

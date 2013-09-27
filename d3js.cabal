@@ -2,11 +2,11 @@ name:                d3js
 version:             0.1.0.0
 synopsis:            Declarative visualization on a web browser with DSL approach.
 description:
-  Data visualization on a web browser. This works as a DSL that generates JavaScript source code working with D3.js (http://d3js.org/) library.
+  A library for visualization on a web browser. This works as a DSL that generates JavaScript source code working with D3.js (<http://d3js.org/>) library.
   .
   You can compose operations with a typed DSL with Haskell's abstraction power.
   .
-  This is still an alpha version. 
+  This is still an alpha version, and the structure may be changed in the near future.
   .
   * A simplest example: drawing a bar chart
   .
