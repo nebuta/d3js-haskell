@@ -30,7 +30,7 @@ execute :: Chain () b -> St ()
 execute chain = tell $ T.concat [reify chain,";\n"]
 
 -- | d[0] as a user-defined function.
-idx0,idx1 :: NumFunc r
+idx0,idx1,_x :: NumFunc r
 idx0 = Index (NInt 0) DataParam
 
 -- | d[1] as a user-defined function.
@@ -41,6 +41,9 @@ _x = Field "x" DataParam
 
 -- | d.y as a user-defined function.
 _y = Field "y" DataParam
+
+random_ :: NumFunc Double
+random_ = ApplyFunc' "Math.random" []
 
 class Assignable a where
 	newVar :: St (Var' a)
@@ -54,11 +57,20 @@ class Assignable a where
 instance Assignable Data2D where
 	newVar = newVar' "dat"
 
+instance Assignable Data1D where
+	newVar = newVar' "dat"
+
 instance Assignable (SelData Data2D) where
 	newVar = newVar' "sel_dat"
 
 instance Assignable Selection where
 	newVar = newVar' "sel"
+
+instance Assignable Scale where
+	newVar = newVar' "scale"
+
+instance Assignable Force where
+	newVar = newVar' "force"
 
 newVar' :: Text -> St (Var' a)
 newVar' baseName = getUniqueNum >>= (return . Var' . T.append baseName . show')

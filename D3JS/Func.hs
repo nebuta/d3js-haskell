@@ -51,6 +51,10 @@ remove = func "remove" []
 datum :: Var' r -> Chain Selection (SelData r)
 datum (Var' d) = func "datum" [ParamVar d]
 
+-- | map()
+mapD3 :: FuncDef -> Chain r r
+mapD3 f = func "map" [PFunc f]
+
 -- | filter()
 filterD3 :: FuncDef -> Chain (SelData r) (SelData r)
 filterD3 f = func "filter" [PFunc f]
@@ -64,7 +68,7 @@ order :: Chain (SelData r) (SelData r)
 order = func "order" []
 
 -- | append()
-appendD3 :: Text -> Chain (SelData a) (SelData a)
+appendD3 :: Text -> Chain a a
 appendD3 = funct1 "append"
 
 -- * Attributes and styles
@@ -115,13 +119,16 @@ transform' tx ty sx sy r =
 opacity :: Sel a => Double -> Chain a a
 opacity = attrd "fill-opacity"
 
-fill :: Sel a => Text -> Chain a a
-fill = style "fill"
+fill :: Sel a => JSParam -> Chain a a
+fill p = func "style" [PText "fill", p]
+
+fill' :: Sel a => Text -> Chain a a
+fill' = style "fill"
 
 -- * Animation and Interaction
 
 -- | on()
-on :: Text -> FuncDef -> Chain (SelData r) (SelData r)
+on :: Text -> FuncDef -> Chain a a
 on typ f = func "on" [PText typ,PFunc f]
 
 mouse :: Text -> FuncDef
@@ -170,10 +177,37 @@ node = func "node" []
 size :: (Sel a) => Chain a Int
 size = func "size" []
 
+-- | size by attributes width, height
+size_ w h = attrd "width" w >>> attrd "height" h
 
 -- * Transitions
 
+-- * Arrays
+range :: Int -> Chain () Data1D
+range to = Val "d3" >>> funci1 "range" to
 
+
+-- * Scales
+
+category10 :: Chain () Scale
+category10 = Val "d3.scale" >>> func "category10" []
+
+-- * Force
+
+force :: Chain () Force
+force = Val "d3.layout.force()"
+
+gravity :: Double -> Chain Force Force
+gravity = funcd1 "gravity"
+
+charge :: JSParam -> Chain Force Force
+charge v = func "charge" [v]
+
+nodes :: Var' r -> Chain Force Force
+nodes (Var' d) = func "nodes" [ParamVar d]
+
+force_size :: (Double,Double) -> Chain Force Force
+force_size (w,h) = func "size" [PArray [(PDouble w),(PDouble h)]]
 -- * Helper functions for Chain a b type
 
 func :: FuncName -> [JSParam] -> Chain a b
@@ -181,7 +215,12 @@ func name params = Func $ JSFunc name params
 
 funct1 name t = func name [PText t]
 
+funci1 name v = func name [PInt v]
+
 funcd1 name v = func name [PDouble v]
+
+field :: Text -> Chain a b
+field n = ChainField n
 
 -- |Function that does not change type in a method chain.
 func' :: FuncName -> [JSParam] -> Chain a a

@@ -10,6 +10,9 @@ import D3JS.Type
 instance Reifiable Var where
 	reify t = t
 
+instance Reifiable (Var' r) where
+	reify (Var' name) = name
+
 instance Reifiable (Chain a b) where
 	reify (Val name) = name
 	reify (Val' v) = reify v
@@ -18,6 +21,7 @@ instance Reifiable (Chain a b) where
 	reify (Concat f g) = T.concat [reify g,".",reify f] -- method chain flows from left to right, so flips f and g.
 	reify (Func f) = reify f
 	reify Nil = ""
+	reify (ChainField name) = name
 
 -- instance Reifiable D3Root where
 --	reify D3Root = "d3"
@@ -35,18 +39,31 @@ instance Reifiable JSParam where
 	reify (ParamVar name) = name
 	reify (PText t) = T.concat ["\"",t,"\""]
 	reify (PDouble d) = show' d
+	reify (PInt d) = show' d
 	reify (PFunc (FuncTxt t)) = t
-	reify (PFunc (FuncExp f)) = T.concat["function(d){return ",reify f,";}"]
+	reify (PFunc (FuncExp f)) = T.concat["function(d,i){return ",reify f,";}"]
+	reify (PArray vs) = T.concat ["[",T.intercalate "," $ map reify vs,"]"]
 
 
 instance Reifiable (NumFunc r) where
 	reify (NInt i) = show' i
 	reify (NDouble d) = show' d
+	reify (NVar v) = v
+	reify (Add a b) = T.concat [reify a," + ",reify b]
 	reify (Mult a b) = T.concat [reify a," * ",reify b]
+	reify (Subt a b) = T.concat [reify a," - ",reify b]
+	reify (Mod a b) = T.concat [reify a," % ",reify b]
 	reify DataParam = "d"
+	reify DataIndex = "i"
 	reify (Index i ns) = T.concat [reify ns,"[",reify i,"]"]
 	reify (Field name obj) = T.concat [reify obj,".",name]
-	reify (ApplyFunc name params) = T.concat [name,"\"",T.concat $ map reify params,"\""]
+	reify (Ternary cond a b) = T.concat ["(", reify cond, ") ? (", reify a, ") : (", reify b, ")"]
+	reify (ApplyFunc var params) = T.concat [unVar' var,"(",T.concat $ map reify params,")"]
+	reify (ApplyFunc' name params) = T.concat [name,"(",T.concat $ map reify params,")"]
+	reify (MkObject pairs) =
+		let f (key,val) = T.concat [key,": ",reify val]
+		in T.concat ["{",T.intercalate "," $ map f pairs,"}"]
+
 	-- Stub: incomplete!!
 
 

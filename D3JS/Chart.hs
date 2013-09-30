@@ -37,7 +37,7 @@ bars n width ps (Var' elem) = do
 	execute $
 		(Val elem :: Chain () Selection)
 		>>> addRect v
-		>>> fill "red"
+		>>> fill' "red"
 
 ticks :: [(Double,Double)] -> Var' Selection -> St ()
 ticks vs (Var' elem) = undefined
@@ -105,7 +105,7 @@ addCircles dat =
 		>>> appendD3 "circle"
 		>>> attrt "class" "p"
 		>>> attrd "r" 3
-		>>> fill "blue"
+		>>> fill' "blue"
 		>>> attr "cx" (funcExp idx0)
 		>>> attr "cy" (funcExp idx1)
 
@@ -133,7 +133,7 @@ addFrame (Size w h) (Size w2 h2) box = do
 	execute $
 		Val'' box
 		>>> addRect v
-		>>> fill "none"
+		>>> fill' "none"
 		>>> attrt "stroke" "black"
 		>>> attrd "stroke-width" 1
 
