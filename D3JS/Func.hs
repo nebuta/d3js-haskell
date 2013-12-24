@@ -18,6 +18,12 @@ import Control.Category
 d3Root :: Chain () Selection
 d3Root = Val "d3"
 
+use :: Var' r -> Chain () r
+use = Val''
+
+(.>) :: Var' r -> Chain r b -> Chain () b
+v .> chain = Val'' v >>> chain
+
 -- | select() in D3.js
 select :: Selector -> Chain Selection Selection
 select = funct1 "select"
@@ -52,8 +58,8 @@ datum :: Var' r -> Chain Selection (SelData r)
 datum (Var' d) = func "datum" [ParamVar d]
 
 -- | map()
-mapD3 :: FuncDef -> Chain r r
-mapD3 f = func "map" [PFunc f]
+mapD3 :: NumFunc r -> Chain a JSObjArray -- stub
+mapD3 f = func "map" [funcExp f]
 
 -- | filter()
 filterD3 :: FuncDef -> Chain (SelData r) (SelData r)
@@ -76,14 +82,21 @@ appendD3 = funct1 "append"
 attr :: Text -> JSParam -> Chain a a
 attr key val = func' "attr" [PText key, val]
 
-attrf :: Text -> JSParam -> Chain a a
-attrf key val = func' "attr" [PText key, val]
+attrf :: Text -> NumFunc r -> Chain a a
+attrf key val = func' "attr" [PText key, funcExp val]
 
 attrt :: Text -> Text -> Chain a a
 attrt key val = attr key (PText val)
 
 attrd :: Text -> Double -> Chain a a
 attrd key val = attr key (PDouble val)
+
+attrds :: [(Text,Double)] -> Chain a a
+attrds [] = id
+attrds ((k,v):xs) = attrd k v >>> attrds xs
+
+attri :: Text -> Int -> Chain a a
+attri key val = attr key (PInt val)
 
 style :: Text -> Text -> Chain a a
 style key val = func' "style" [PText key, PText val]
@@ -124,6 +137,10 @@ fill p = func "style" [PText "fill", p]
 
 fill' :: Sel a => Text -> Chain a a
 fill' = style "fill"
+
+-- * Color
+hsl :: JSParam -> JSParam -> JSParam -> NumFunc Color
+hsl h s l = ApplyFunc' "d3.hsl" [h,s,l]
 
 -- * Animation and Interaction
 
@@ -179,12 +196,13 @@ size = func "size" []
 
 -- | size by attributes width, height
 size_ w h = attrd "width" w >>> attrd "height" h
+sizei_ w h = attrd "width" (fromIntegral w) >>> attrd "height" (fromIntegral h)
 
 -- * Transitions
 
 -- * Arrays
 range :: Int -> Chain () Data1D
-range to = Val "d3" >>> funci1 "range" to
+range to = d3Root >>> funci1 "range" to
 
 
 -- * Scales

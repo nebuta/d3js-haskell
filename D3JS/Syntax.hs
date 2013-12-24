@@ -60,6 +60,9 @@ instance Assignable Data2D where
 instance Assignable Data1D where
 	newVar = newVar' "dat"
 
+instance Assignable JSObjArray where
+	newVar = newVar' "array"
+
 instance Assignable (SelData Data2D) where
 	newVar = newVar' "sel_dat"
 

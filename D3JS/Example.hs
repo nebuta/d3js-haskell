@@ -74,7 +74,7 @@ d3jsUrl = "./d3.v3.min.js"
 collision' :: St ()
 collision' = do
 	let (w,h) = (1280,800)
-	ns <- assign $ range 200 >>> mapD3 (FuncExp $ MkObject [("radius",random_ * 12 + 4)])
+	ns <- assign $ range 200 >>> mapD3 (MkObject [("radius",random_ * 12 + 4)]) :: St (Var' JSObjArray)
 	color <- assign $ category10
 	force' <- assign $
 				force

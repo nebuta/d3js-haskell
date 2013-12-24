@@ -67,7 +67,7 @@ Test-Suite spec
   Default-Language:     Haskell2010
   Hs-Source-Dirs:       test
   Ghc-Options:          -Wall
-  Main-Is:              Example.hs
+  Main-Is:              Test.hs
  -- Other-Modules:        Example
   Build-Depends:        base
                       , hspec >= 1.3

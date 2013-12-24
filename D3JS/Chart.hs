@@ -15,7 +15,7 @@ import Control.Category
 import Data.Text (Text)
 import qualified Data.Text as T
 
-import Debug.Trace
+-- import Debug.Trace
 
 -- import Data.Default
 
@@ -76,7 +76,7 @@ scaleInRange (Range cmin cmax) (Range vmin vmax) v =
 
 scatter :: Scatter -> Var' Selection -> St (Var' (SelData Data2D))
 scatter s@(Scatter rx ry tx ty ps) (Var' elem) = do
-	v <- assign $ Val' (traceShow s ps)
+	v <- assign $ Val' ps
 	cs <- assign $
 		(Val elem :: Chain () Selection)
 		>>> addCircles v
@@ -114,7 +114,7 @@ disappear :: (Sel2 a) => Double -> Double -> Var' a -> St ()
 disappear delay_ duration var = do
 	execute $
 		Val'' var
-		>>> transition' (funcExp ((100::NumFunc Int) * idx0))
+		>>> transition' (funcExp ((NInt 100) * idx0))
 		>>> attrd "r" 10
 		>>> delay (PDouble delay_)
 		>>> style "opacity" "0"

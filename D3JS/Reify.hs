@@ -42,6 +42,7 @@ instance Reifiable JSParam where
 	reify (PInt d) = show' d
 	reify (PFunc (FuncTxt t)) = t
 	reify (PFunc (FuncExp f)) = T.concat["function(d,i){return ",reify f,";}"]
+	reify (PFunc' f) = reify f
 	reify (PArray vs) = T.concat ["[",T.intercalate "," $ map reify vs,"]"]
 
 
@@ -55,11 +56,12 @@ instance Reifiable (NumFunc r) where
 	reify (Mod a b) = T.concat [reify a," % ",reify b]
 	reify DataParam = "d"
 	reify DataIndex = "i"
+	reify DataIndexD = "i"
 	reify (Index i ns) = T.concat [reify ns,"[",reify i,"]"]
 	reify (Field name obj) = T.concat [reify obj,".",name]
 	reify (Ternary cond a b) = T.concat ["(", reify cond, ") ? (", reify a, ") : (", reify b, ")"]
-	reify (ApplyFunc var params) = T.concat [unVar' var,"(",T.concat $ map reify params,")"]
-	reify (ApplyFunc' name params) = T.concat [name,"(",T.concat $ map reify params,")"]
+	reify (ApplyFunc var params) = T.concat [unVar' var,"(",T.intercalate "," $ map reify params,")"]
+	reify (ApplyFunc' name params) = T.concat [name,"(",T.intercalate "," $ map reify params,")"]
 	reify (MkObject pairs) =
 		let f (key,val) = T.concat [key,": ",reify val]
 		in T.concat ["{",T.intercalate "," $ map f pairs,"}"]
