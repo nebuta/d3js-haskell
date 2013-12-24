@@ -61,3 +61,15 @@ library
                        , random
   -- hs-source-dirs:      
   default-language:    Haskell2010
+
+Test-Suite spec
+  Type:                 exitcode-stdio-1.0
+  Default-Language:     Haskell2010
+  Hs-Source-Dirs:       test
+  Ghc-Options:          -Wall
+  Main-Is:              Example.hs
+ -- Other-Modules:        Example
+  Build-Depends:        base
+                      , hspec >= 1.3
+                      , QuickCheck
+                      , d3js
