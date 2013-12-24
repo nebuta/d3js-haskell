@@ -10,6 +10,16 @@ import D3JS.Reify
 
 import Control.Monad.RWS
 
+
+-- Argument for data() function
+class DataArg a
+instance DataArg a => DataArg (Var' a)
+
+instance DataArg JSObjArray
+instance DataArg (Var' JSObjArray)
+instance DataArg Data1D
+instance DataArg FuncDef
+
 -- | St (which means Statement) monad represents JavaScript statements.
 -- "D3JS.Chart" uses St monad extensively.
 type St r =  RWS () Text Int r
@@ -65,6 +75,9 @@ instance Assignable JSObjArray where
 
 instance Assignable (SelData Data2D) where
 	newVar = newVar' "sel_dat"
+
+instance Assignable (SelData JSObjArray) where
+	newVar = newVar' "sel_array_obj"
 
 instance Assignable Selection where
 	newVar = newVar' "sel"

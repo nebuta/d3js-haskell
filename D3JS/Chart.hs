@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings,MultiParamTypeClasses,NoImplicitPrelude,GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE OverloadedStrings,MultiParamTypeClasses,NoImplicitPrelude,GeneralizedNewtypeDeriving,FlexibleInstances #-}
 
 -- |This modules provides high-level functions for drawing common charts, such as bar charts and scatter plots.
 --  Those functions also exemplify how to compose primitive functions to achieve complex drawing.
@@ -9,6 +9,7 @@ import D3JS.Type
 import D3JS.Func
 import D3JS.Syntax
 import D3JS.Reify
+import D3JS.Preset
 
 import Prelude hiding ((.),id)
 import Control.Category
@@ -85,11 +86,14 @@ scatter s@(Scatter rx ry tx ty ps) (Var' elem) = do
 -- | Add rectangles with an array of objects {x: x, y: y, width: w , height: h}
 addRect :: Sel2 a => Var' RectData -> Chain a (SelData RectData)
 addRect dat =
-	selectAll "rect" >>> dataD3 dat >>> enter >>> appendD3 "rect"
+	enterData Rect dat
 	>>> attr "x" (funcExp _x)
 	>>> attr "y" (funcExp _y)
 	>>> attr "width" (funcExp $ Field "width" DataParam)
 	>>> attr "height" (funcExp $ Field "height" DataParam)
+
+instance DataArg RectData
+instance DataArg Data2D
 
 mkRectData :: Double -> Data1D -> RectData
 mkRectData bar_width (Data1D ps) =

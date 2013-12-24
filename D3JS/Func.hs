@@ -4,6 +4,7 @@
 module D3JS.Func where
 
 import D3JS.Type
+import D3JS.Syntax
 
 import Data.List
 import Data.Text (Text)
@@ -35,8 +36,11 @@ selectAll = funct1 "selectAll"
 -- * Data manipulation
 
 -- | data() in D3.js. Assigns new data to selection.
-dataD3 :: Var' r -> Chain Selection (SelData r)
+dataD3 :: DataArg r => Var' r -> Chain Selection (SelData r)
 dataD3 (Var' d) = func "data" [ParamVar d]
+
+dataD3' :: NumFunc r -> Chain Selection (SelData r)
+dataD3' f = func "data" [funcExp f]
 
 -- | insert()
 insertD3 :: Text -> Chain (SelData a) (SelData a)
@@ -60,6 +64,8 @@ datum (Var' d) = func "datum" [ParamVar d]
 -- | map()
 mapD3 :: NumFunc r -> Chain a JSObjArray -- stub
 mapD3 f = func "map" [funcExp f]
+
+mapD3' ft = func "map" [funcTxt ft]
 
 -- | filter()
 filterD3 :: FuncDef -> Chain (SelData r) (SelData r)

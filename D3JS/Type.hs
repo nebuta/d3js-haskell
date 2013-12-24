@@ -130,15 +130,16 @@ data NumFunc r where
 
 data JSObj = JSObj
 
-fieldd :: Text -> NumFunc JSObj -> NumFunc a
+fieldd :: Text -> NumFunc JSObj -> NumFunc Double
 fieldd = Field
 
+infixl 7 ..>
 (..>) :: NumFunc JSObj -> Text -> NumFunc a
-a ..> b = fieldd b a
+a ..> b = Field b a
 
 data JSObject = forall r. JSObject [(Text,NumFunc r)]
 
-data JSObjArray = JSObjArray JSObject -- internal representation is same as object. 
+data JSObjArray = JSObjArray JSObject | JSObjArrayRaw Text -- internal representation is same as object. 
 
 class NumFuncVal a
 instance NumFuncVal Int
@@ -170,10 +171,9 @@ instance Fractional (NumFunc Double) where
 -- |This should not be used directly by users. Users should use 'assign' to get a variable instead.
 data Var' dat = Var' {unVar' :: Var}  -- typed variables
 
-
-
-data SvgElement = Rect | Circle | Path | SvgOther Text
+data SvgElement = Rect | Circle | Path | G | SvgOther Text
 instance Show SvgElement where
 	show Rect = "rect"
 	show Circle = "circle"
+	show G = "g"
 	show _ = "Unknown yet"

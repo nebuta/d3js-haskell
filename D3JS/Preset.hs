@@ -13,8 +13,11 @@ import D3JS.Type
 import D3JS.Func
 import D3JS.Syntax
 
-enterData :: Sel2 a => SvgElement -> Var' JSObjArray -> Chain a (SelData JSObjArray)
+enterData :: (Sel2 a, DataArg b) => SvgElement -> Var' b -> Chain a (SelData b)
 enterData elem dat = selectAll (T.pack $ show elem) >>> dataD3 dat >>> enter >>> appendD3 (T.pack $ show elem)
+
+enterData' :: (Sel2 a, DataArg b) => SvgElement -> NumFunc b -> Chain a (SelData b)
+enterData' elem dat = selectAll (T.pack $ show elem) >>> dataD3' dat >>> enter >>> appendD3 (T.pack $ show elem)
 
 mkSvg :: Text -> (Int,Int) -> St (Var' Selection)
 mkSvg elem (w,h) = assign $ d3Root >>> select elem >>> appendD3 "svg" >>> sizei_ w h
