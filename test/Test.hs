@@ -2,7 +2,7 @@
 
 {-# LANGUAGE OverloadedStrings,NoImplicitPrelude #-}
 
-module Example where
+module Main where
 
 import D3JS
 import Test.Hspec
@@ -44,7 +44,7 @@ tests = [("rects2d.html",rects2d)]
 
 objConst = DataParam :: NumFunc JSObjArray
 
-runAll = forM_ tests $ \(n,st) -> writeToHtml n st
+main = forM_ tests $ \(n,st) -> writeToHtml n st
 
 rand2D :: Int -> IO [(Double,Double)]
 rand2D n = do

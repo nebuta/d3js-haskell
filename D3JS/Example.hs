@@ -18,7 +18,7 @@ import System.Random
 
 import Prelude hiding (id,(.))
 import Control.Category
-
+import D3JS.Preset
 -- * Examples
 
 test1, test2, test3 :: IO ()
