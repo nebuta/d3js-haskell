@@ -55,7 +55,7 @@ library
                        D3JS.Example
   -- other-modules:       
   -- other-extensions:    
-  build-depends:       base >=4.6 && <4.7
+  build-depends:       base >=4.6 && <4.8
                        , mtl
                        , text
                        , random
@@ -74,4 +74,7 @@ Test-Suite spec
                       , QuickCheck
                       , d3js
                       , text
+                      , random
+                      , transformers
+                      , containers
 

@@ -19,9 +19,11 @@ instance Reifiable (Chain a b) where
 	reify (Val'' (Var' n)) = n
 	reify (Concat Nil g) = reify g
 	reify (Concat f g) = T.concat [reify g,".",reify f] -- method chain flows from left to right, so flips f and g.
-	reify (Func f) = reify f
+	-- reify (Func f) = reify f
 	reify Nil = ""
-	reify (ChainField name) = name
+	-- reify (ChainField name) = name
+	reify (Refine name) = name
+	reify (Apply args chain) = T.concat [reify chain,"(",T.intercalate "," $ map reify args,")"]
 
 -- instance Reifiable D3Root where
 --	reify D3Root = "d3"
@@ -32,7 +34,7 @@ instance Reifiable Data1D where
 instance Reifiable Data2D where
 	reify (Data2D ps) = surround $ T.intercalate "," $ map (\(x,y) -> T.concat ["[",show' x,",",show' y,"]"]) ps
 
-instance Reifiable (JSFunc a c b) where
+instance Reifiable (JSFunc params r) where
 	reify (JSFunc name params) = T.concat [name,"(",T.intercalate "," $ map reify params,")"]
 
 instance Reifiable JSParam where
@@ -44,6 +46,7 @@ instance Reifiable JSParam where
 	reify (PFunc (FuncExp f)) = T.concat["function(d,i){return ",reify f,";}"]
 	reify (PFunc' f) = reify f
 	reify (PArray vs) = T.concat ["[",T.intercalate "," $ map reify vs,"]"]
+	reify (PChainValue v) = reify v
 
 
 instance Reifiable (NumFunc r) where
@@ -57,6 +60,7 @@ instance Reifiable (NumFunc r) where
 	reify DataParam = "d"
 	reify DataIndex = "i"
 	reify DataIndexD = "i"
+	reify (ChainVal chain) = reify chain
 	reify (Index i ns) = T.concat [reify ns,"[",reify i,"]"]
 	reify (Field name obj) = T.concat [reify obj,".",name]
 	reify (Ternary cond a b) = T.concat ["(", reify cond, ") ? (", reify a, ") : (", reify b, ")"]
