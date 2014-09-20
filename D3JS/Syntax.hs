@@ -39,19 +39,6 @@ instance Reifiable (St r) where
 execute :: Chain () b -> St ()
 execute chain = tell $ T.concat [reify chain,";\n"]
 
--- | d[0] as a user-defined function.
-idx0,idx1,_x :: NumFunc r
-idx0 = Index (NInt 0) DataParam
-
--- | d[1] as a user-defined function.
-idx1 = Index (NInt 1) DataParam
-
--- | d.x as a user-defined function.
-_x = Field "x" DataParam
-
--- | d.y as a user-defined function.
-_y = Field "y" DataParam
-
 random_ :: NumFunc Double
 random_ = ApplyFunc' "Math.random" []
 
@@ -87,6 +74,12 @@ instance Assignable Scale where
 
 instance Assignable Force where
 	newVar = newVar' "force"
+
+instance Assignable D3Func where
+	newVar = newVar' "func"
+
+instance Assignable Histogram where
+	newVar = newVar' "hist"
 
 newVar' :: Text -> St (Var' a)
 newVar' baseName = getUniqueNum >>= (return . Var' . T.append baseName . show')

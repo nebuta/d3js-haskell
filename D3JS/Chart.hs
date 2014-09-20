@@ -40,8 +40,8 @@ bars n width ps (Var' elem) = do
 		>>> addRect v
 		>>> fill' "red"
 
-ticks :: [(Double,Double)] -> Var' Selection -> St ()
-ticks vs (Var' elem) = undefined
+-- ticks :: [(Double,Double)] -> Var' Selection -> St ()
+-- ticks vs (Var' elem) = undefined
 
 data Range a = Range a a deriving (Show)
 newtype Scalar = Scalar {unScalar :: Double} deriving (Show,Num,Real,Eq,Ord,Fractional)
@@ -87,8 +87,8 @@ scatter s@(Scatter rx ry tx ty ps) (Var' elem) = do
 addRect :: Sel2 a => Var' RectData -> Chain a (SelData RectData)
 addRect dat =
 	enterData Rect dat
-	>>> attr "x" (funcExp _x)
-	>>> attr "y" (funcExp _y)
+	>>> attr "x" (funcExp x_)
+	>>> attr "y" (funcExp y_)
 	>>> attr "width" (funcExp $ Field "width" DataParam)
 	>>> attr "height" (funcExp $ Field "height" DataParam)
 
@@ -106,7 +106,7 @@ addCircles dat =
 	selectAll "circle"
 		>>> dataD3 dat
 		>>> enter
-		>>> appendD3 "circle"
+		>>> appendD3 Circle
 		>>> attrt "class" "p"
 		>>> attrd "r" 3
 		>>> fill' "blue"
@@ -118,7 +118,7 @@ disappear :: (Sel2 a) => Double -> Double -> Var' a -> St ()
 disappear delay_ duration var = do
 	execute $
 		Val'' var
-		>>> transition' (funcExp ((NInt 100) * idx0))
+		>>> transition' (funcExp (100 * idx0))
 		>>> attrd "r" 10
 		>>> delay (PDouble delay_)
 		>>> style "opacity" "0"

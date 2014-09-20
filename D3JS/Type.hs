@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings, GADTs, NoImplicitPrelude, ExistentialQuantification, FlexibleInstances #-}
+{-# LANGUAGE OverloadedStrings, GADTs, NoImplicitPrelude, ExistentialQuantification, FlexibleInstances, Rank2Types #-}
 
 module D3JS.Type where
 
@@ -19,11 +19,26 @@ data Chain a b where
 	Val :: Var -> Chain () b
 	Val' :: (Reifiable b) => b -> Chain () b
 	Val'' :: Var' b -> Chain () b
-	Func :: JSFunc a params b -> Chain a b
+	-- Func :: JSFunc params b -> Chain a b
 	Concat :: Chain c b -> Chain a c -> Chain a b
 	Nil :: Chain a a
-	ChainField :: Text -> Chain a b
+	-- ChainField :: Text -> Chain a b
+	Refine :: JSObjClass a => Text -> Chain a b
+	Apply :: forall a b params. [JSParam] -> Chain a (JSFunc params b) -> Chain a b
 
+class JSObjClass a
+instance JSObjClass JSObj
+instance JSObjClass Force
+instance JSObjClass Histogram
+instance JSObjClass Selection
+instance JSObjClass Transition
+instance JSObjClass Scale
+
+type ChainValue r = Chain () r
+type IsoChain r = Chain r r
+
+type RefineFunc = forall params r. Chain JSObj (JSFunc params r)
+ 
 -- | Chain a b behaves just like (a -> b).
 -- Val Var is the starting point of chain (= constant),
 -- and Nil is the termination of chain.
@@ -43,10 +58,15 @@ data Data2D = Data2D [(Double,Double)] deriving (Show)
 -- Selection with associated data
 data SelData a = SelData
 
+instance JSObjClass (SelData a)
+
 -- Various objects
 data Force = Force
 data Scale = Scale
 data Color = Color
+data D3Func = D3Func -- functions returned by d3, e.g. d3.format, etc.
+
+data Histogram = Histogram
 
 -- The following types are just used as a tag for chaining functions with a type.
 data Selection = Selection
@@ -57,30 +77,41 @@ class Reifiable a where
 	reify :: a -> Text
 
 -- |Used just as a tag for typing method chains. Used in "D3JS.Func".
-class Sel a
+class JSObjClass a => Sel a
 instance Sel Selection
 instance Sel (SelData a)
 
+
+class JSArrayClass a
+
+instance JSArrayClass Data1D
+instance JSArrayClass Data2D
+instance JSArrayClass JSObjArray
+
 -- |Used just as a tag for typing method chains. Used in "D3JS.Func".
-class Sel2 a
+class JSObjClass a => Sel2 a
 instance Sel2 Selection
 instance Sel2 (SelData a)
-instance Sel2 (Chain () b)
-instance Sel2 (Var' a)
+instance (JSObjClass b) => Sel2 (Chain () b)
+instance (JSObjClass a) => Sel2 (Var' a)
+instance Sel2 Transition
 
+instance JSObjClass JSObjArray
 
+instance (JSObjClass a) => JSObjClass (Chain () a)
+instance (JSObjClass a) => JSObjClass (Var' a)
 
 -- * For internal use
 
 -- | Function call for method chaining
-data JSFunc a c b = JSFunc FuncName [JSParam]  -- name and params
+data JSFunc params r = JSFunc FuncName [JSParam]  -- name and params
 
 type FuncName = Text
 
 -- | Parameter for a function call
 data JSParam =
 	ParamVar Var | PText Text | PDouble Double | PInt Int | PFunc FuncDef | forall r. PFunc' (NumFunc r)
-	| PArray [JSParam] | PCompositeNum NumOp JSParam JSParam
+	| PArray [JSParam] | PCompositeNum NumOp JSParam JSParam | forall r. PChainValue (ChainValue r)
 
 data NumOp = forall a. Num a => NumOp (a -> a -> a) | NumOpAdd | NumOpSubt | NumOpMult | NumOpFromInteger -- stub
 
@@ -107,7 +138,8 @@ funcExp = PFunc . FuncExp
 return_ :: NumFunc r -> FuncDef
 return_ = FuncExp
 
--- | Representation of JavaScript function for a callback.
+-- | Representation of JavaScript function
+-- Should be renamed to JSExp or something
 data NumFunc r where
 	NInt :: Int -> NumFunc Int
 	NDouble :: Double -> NumFunc Double
@@ -121,12 +153,15 @@ data NumFunc r where
 	Ternary :: NumFunc a -> NumFunc r -> NumFunc r -> NumFunc r
 	NVar :: Var -> NumFunc r
 	NVar' :: Var' r -> NumFunc r
+	ChainVal :: ChainValue r -> NumFunc r
 	DataParam :: NumFunc r
 	DataIndex :: NumFunc Int
 	DataIndexD :: NumFunc Double  -- ad hoc?
 	ApplyFunc :: Var' a -> [JSParam] -> NumFunc r -- different from JSFunc, because this is not a method chain.
 	ApplyFunc' :: FuncName -> [JSParam] -> NumFunc r -- different from JSFunc, because this is not a method chain.
 	MkObject :: [(Text,NumFunc r)] -> NumFunc JSObject
+
+mkObj = MkObject
 
 data JSObj = JSObj
 
@@ -171,8 +206,9 @@ instance Fractional (NumFunc Double) where
 -- |This should not be used directly by users. Users should use 'assign' to get a variable instead.
 data Var' dat = Var' {unVar' :: Var}  -- typed variables
 
-data SvgElement = Rect | Circle | Path | G | SvgOther Text
+data SvgElement = Svg | Rect | Circle | Path | G | SvgOther Text
 instance Show SvgElement where
+	show Svg = "svg"
 	show Rect = "rect"
 	show Circle = "circle"
 	show G = "g"

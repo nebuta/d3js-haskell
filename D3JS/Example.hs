@@ -67,7 +67,7 @@ writeToHtml :: (Reifiable a) => FilePath -> a -> IO ()
 writeToHtml path a = T.writeFile path $ T.concat ["<html> <head><body> <div id='body'></div> <script src='",d3jsUrl,"' charset='utf-8'></script> <script charset='utf-8'>\n",reify a,"\n</script> </body> </html>"]
 
 
-d3jsUrl = "./d3.v3.min.js"
+d3jsUrl = "./d3.js"
 -- d3jsUrl = "http://d3js.org/d3.v3.min.js"
 
 
@@ -85,14 +85,14 @@ collision' = do
 	execute $ Val' force' >>> func "start" []
 	svg <- assign $ d3Root
 			>>> select "#body"
-			>>> appendD3 "svg"
+			>>> appendD3 Svg
 			>>> size_ w h
 	d <- assign $ Val' ns >>> funci1 "slice" 1
 	execute $
 		Val' svg >>> selectAll "circle"
 			>>> dataD3 (d :: Var' Data1D)
 			>>> enter
-			>>> appendD3 "svg:circle"
+			>>> appendD3 Circle
 			>>> attr "r" (funcExp (Field "radius" DataParam - (NDouble 2)))
 			>>> fill (funcExp (ApplyFunc color [funcExp (DataIndex % (NInt 3))]))
 	execute $ Val' force' >>> on "tick" (FuncTxt $ "function(e){}")	
